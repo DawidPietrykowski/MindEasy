@@ -1,5 +1,6 @@
 import 'dart:async';
-  import 'package:http/http.dart' as http;
+import 'package:gemini_app/config.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -11,13 +12,19 @@ class EegState {
     required this.mind_wandering,
     required this.focus,
   });
+
+  String getJsonString() {
+    return '{"mind_wandering": $mind_wandering, "focus": $focus}';
+  }
 }
 
 
 class EegCubit extends Cubit<EegState> {
-  EegCubit() : super(EegState(mind_wandering: 0.0, focus: 0.0)) {
+  EegCubit() : super(EegState(mind_wandering: 0.9, focus: 0.1)) {
     // Start the timer when the cubit is created
-    startPolling();
+    if (isDebug) {
+      startPolling();
+    }
   }
 
   Timer? _timer;
@@ -43,6 +50,10 @@ class EegCubit extends Cubit<EegState> {
 
 
 Future<List<double>> fetchEegData() async {
+  if (isDebug) {
+    return [0.9, 0.1]; // Placeholder ret
+  }
+  
   final url = Uri.parse('http://192.168.83.153:1234');
   
   try {
@@ -82,5 +93,14 @@ Future<List<double>> fetchEegData() async {
   Future<void> close() {
     stopPolling();
     return super.close();
+  }
+
+  void toggleState() {
+    // Toggle the state between mind_wandering and focus
+    if (state.mind_wandering > state.focus) {
+      updateEegData(state.focus, state.mind_wandering);
+    } else {
+      updateEegData(state.mind_wandering, state.focus);
+    }
   }
 }

@@ -1,5 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/services.dart';
+import 'package:gemini_app/config.dart';
+import 'package:gemini_app/bloc/eeg_state.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 enum GeminiStatus { initial, loading, success, error }
@@ -40,7 +42,7 @@ class GeminiState {
 class GeminiCubit extends Cubit<GeminiState> {
   GeminiCubit() : super(GeminiState.initialState);
 
-void sendMessage(String prompt) async {
+void sendMessage(String prompt, EegState eegState) async {
   var messagesWithoutPrompt = state.messages;
   var messagesWithPrompt = state.messages + [
     Content.text(prompt)
@@ -59,20 +61,23 @@ void sendMessage(String prompt) async {
 
 
   const String systemPrmpt = """You are an AI tutor helping students understand topics with help of biometric data. You will be supplied with a json containing data extracted from an EEG device, use that data to modify your approach and help the student learn more effectively.
-Write the response in two parts:
-State analysis: <describe what is the state of the student and how to best approach them>
-Tutor response: <continue with the lesson, respond to answers, etc>""";
+  Use language: POLISH
+Write the response in markdown and split it into two parts:
+State analysis: describe what is the state of the student and how to best approach them
+Tutor response: continue with the lesson, respond to answers, etc""";
 
   final model = GenerativeModel(
     model: 'gemini-1.5-pro-latest',
-    apiKey: '',
+    apiKey: geminiApiKey,
     safetySettings: safetySettings,
     systemInstruction: Content.system(systemPrmpt)
   );
 
   try {
     final chat = model.startChat(history: messagesWithoutPrompt);
-    final stream = chat.sendMessageStream(Content.text(prompt));
+    final stream = chat.sendMessageStream(
+    Content.text("EEG DATA:\n${eegState.getJsonString()}\nPytanie:\n$prompt")
+    );
 
     String responseText = '';
 
@@ -92,4 +97,8 @@ Tutor response: <continue with the lesson, respond to answers, etc>""";
     ));
   }
 }
+
+  void resetConversation() {
+    emit(GeminiState.initialState);
+  }
 }

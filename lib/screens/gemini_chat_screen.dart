@@ -35,7 +35,6 @@ class GeminiChatState extends State<GeminiChat> {
 void initState() {
   super.initState();
   _startConversation();
-  context.read<EegCubit>().startPolling();
 }
 
 @override
@@ -47,17 +46,26 @@ void dispose() {
   void _startConversation() async {
     final String rjp = await rootBundle.loadString('assets/lessons/rjp.md');
     print(rjp);
-    context.read<GeminiCubit>().sendMessage("Zacznij prowadzić lekcje na podstawie poniszego skryptu:\n" + rjp);
+    context.read<GeminiCubit>().sendMessage("Jesteś nauczycielem/chatbotem prowadzącym zajęcia z jednym uczniem. Uczeń ma możliwość zadawania pytań w trakcie, natomiast jesteś odpowiedzialny za prowadzenie lekcji i przedstawienie tematu. Zacznij prowadzić lekcje dla jednego ucznia na podstawie poniszego skryptu:\n" + rjp, context.read<EegCubit>().state);
   }
 
   void _sendMessage() async {
-    context.read<GeminiCubit>().sendMessage(_textController.text);
+    context.read<GeminiCubit>().sendMessage(_textController.text, context.read<EegCubit>().state);
     _textController.clear();
+  }
+  void _toggleEegState() {
+    context.read<EegCubit>().toggleState();
+  }
+
+  void _resetConversation() {
+    context.read<GeminiCubit>().resetConversation();
+    _startConversation();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: const Text('Gemini Pro Chat'),
       ),
@@ -103,10 +111,26 @@ void dispose() {
               ),
               onSubmitted: (_) => _sendMessage(),
             ),
-            ElevatedButton(
-              onPressed: _sendMessage,
-              child: const Text('Send'),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _sendMessage,
+                  child: const Text('Send'),
+                ),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: _resetConversation,
+                child: const Text('Reset'),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: _toggleEegState,
+                child: const Text('Toggle State'),
+              ),
+            ],
+          ),
           ],
         ),
       ),
