@@ -2,9 +2,6 @@
 
 **Wstęp:**
 
-* Witam wszystkich. Dzisiaj będziemy rozmawiać o ruchu jednostajnie przyspieszonym.
-* Jest to rodzaj ruchu, w którym obiekt porusza się z coraz większą prędkością w regularnych odstępach czasu.
-
 **Definicja ruchu jednostajnie przyspieszanego:**
 
 * Ruch jednostajnie przyspieszony to ruch, w którym przyspieszenie obiektu jest stałe.

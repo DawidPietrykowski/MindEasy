@@ -18,17 +18,16 @@ class EegState {
   }
 }
 
-
 class EegCubit extends Cubit<EegState> {
   EegCubit() : super(EegState(mind_wandering: 0.9, focus: 0.1)) {
     // Start the timer when the cubit is created
-    if (isDebug) {
+    if (!isDebug) {
       startPolling();
     }
   }
 
   Timer? _timer;
-  
+
   void startPolling() {
     // Poll every 1 second (adjust the duration as needed)
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
@@ -38,46 +37,44 @@ class EegCubit extends Cubit<EegState> {
       // double newFocus = 1 - newMindWandering;
 
       fetchEegData().then((data) {
-      double newMindWandering = data[0];
-      double newFocus = data[1];
-      // Update the state with the new EEG data
-      updateEegData(newMindWandering, newFocus);
+        double newMindWandering = data[0];
+        double newFocus = data[1];
+        // Update the state with the new EEG data
+        updateEegData(newMindWandering, newFocus);
       });
 
       // updateEegData(newMindWandering, newFocus);
     });
   }
 
-
-Future<List<double>> fetchEegData() async {
-  if (isDebug) {
-    return [0.9, 0.1]; // Placeholder ret
-  }
-  
-  final url = Uri.parse('http://192.168.83.153:1234');
-  
-  try {
-    final response = await http.get(url);
-    
-    if (response.statusCode == 200) {
-      // Split the response body by newline and parse as floats
-      List<String> values = response.body.trim().split('\n');
-      if (values.length == 2) {
-        return [
-          double.parse(values[0]),
-          double.parse(values[1]),
-        ];
-      } else {
-        throw Exception('Unexpected response format');
-      }
-    } else {
-      throw Exception('Failed to load EEG data: ${response.statusCode}');
+  Future<List<double>> fetchEegData() async {
+    if (isDebug) {
+      return [0.9, 0.1]; // Placeholder ret
     }
-  } catch (e) {
-    throw Exception('Error fetching EEG data: $e');
-  }
-}
 
+    final url = Uri.parse('http://192.168.83.153:1234');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        // Split the response body by newline and parse as floats
+        List<String> values = response.body.trim().split('\n');
+        if (values.length == 2) {
+          return [
+            double.parse(values[0]),
+            double.parse(values[1]),
+          ];
+        } else {
+          throw Exception('Unexpected response format');
+        }
+      } else {
+        throw Exception('Failed to load EEG data: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching EEG data: $e');
+    }
+  }
 
   void stopPolling() {
     _timer?.cancel();

@@ -1,0 +1,33 @@
+[
+    {
+      "question": "Które z poniższych stwierdzeń opisuje ruch jednostajnie przyspieszony?",
+      "options": [
+        "Prędkość obiektu pozostaje stała.",
+        "Przyspieszenie obiektu jest stałe.",
+        "Pozycja obiektu zmienia się w regularnych odstępach czasu.",
+        "Prędkość obiektu zmienia się w sposób losowy."
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "question": "Które z poniższych równań opisuje ruch jednostajnie przyspieszony?",
+      "options": [
+        "v = u",
+        "a = 0",
+        "s = ut + ½at²",
+        "v² = u² - 2as"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "question": "Samochód przyspiesza z 0 km/h do 100 km/h w ciągu 10 sekund. Jaka jest wartość przyspieszenia samochodu?",
+      "options": [
+        "5 m/s²",
+        "10 m/s²",
+        "15 m/s²",
+        "20 m/s²"
+      ],
+      "correctAnswer": 1
+    }
+  ]
+  

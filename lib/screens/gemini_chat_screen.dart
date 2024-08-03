@@ -30,29 +30,41 @@ class GeminiChat extends StatefulWidget {
 
 class GeminiChatState extends State<GeminiChat> {
   final _textController = TextEditingController();
+  bool _quizMode = false; // Add this line
 
-@override
-void initState() {
-  super.initState();
-  _startConversation();
-}
+  @override
+  void initState() {
+    super.initState();
+    _startConversation();
+  }
 
-@override
-void dispose() {
-  context.read<EegCubit>().stopPolling();
-  super.dispose();
-}
+  void _toggleQuizMode() {
+    setState(() {
+      _quizMode = !_quizMode;
+    });
+  }
+
+  void _checkAnswer(int answer) {
+    context.read<GeminiCubit>().checkAnswer(answer);
+  }
+
+  @override
+  void dispose() {
+    context.read<EegCubit>().stopPolling();
+    super.dispose();
+  }
 
   void _startConversation() async {
-    final String rjp = await rootBundle.loadString('assets/lessons/rjp.md');
-    print(rjp);
-    context.read<GeminiCubit>().sendMessage("Jesteś nauczycielem/chatbotem prowadzącym zajęcia z jednym uczniem. Uczeń ma możliwość zadawania pytań w trakcie, natomiast jesteś odpowiedzialny za prowadzenie lekcji i przedstawienie tematu. Zacznij prowadzić lekcje dla jednego ucznia na podstawie poniszego skryptu:\n" + rjp, context.read<EegCubit>().state);
+    context.read<GeminiCubit>().startLesson(context.read<EegCubit>().state);
   }
 
   void _sendMessage() async {
-    context.read<GeminiCubit>().sendMessage(_textController.text, context.read<EegCubit>().state);
+    context
+        .read<GeminiCubit>()
+        .sendMessage(_textController.text, context.read<EegCubit>().state);
     _textController.clear();
   }
+
   void _toggleEegState() {
     context.read<EegCubit>().toggleState();
   }
@@ -62,35 +74,42 @@ void dispose() {
     _startConversation();
   }
 
+  void _enterQuizMode() {
+    context.read<GeminiCubit>().enterQuizMode();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: const Text('Gemini Pro Chat'),
+        title: BlocBuilder<GeminiCubit, GeminiState>(
+          builder: (context, state) {
+            return Text(state.isQuizMode ? 'Quiz Mode' : 'Gemini Pro Chat');
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-
-                      BlocBuilder<EegCubit, EegState>(
-            builder: (context, eegState) {
-              return Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Mind Wandering: ${eegState.mind_wandering.toStringAsFixed(2)}'),
-                      Text('Focus: ${eegState.focus.toStringAsFixed(2)}'),
-                    ],
+            BlocBuilder<EegCubit, EegState>(
+              builder: (context, eegState) {
+                return Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                            'Mind Wandering: ${eegState.mind_wandering.toStringAsFixed(2)}'),
+                        Text('Focus: ${eegState.focus.toStringAsFixed(2)}'),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-
+                );
+              },
+            ),
             Expanded(
               child: BlocBuilder<GeminiCubit, GeminiState>(
                 builder: (context, state) {
@@ -104,82 +123,143 @@ void dispose() {
                 },
               ),
             ),
-            TextField(
-              controller: _textController,
-              decoration: const InputDecoration(
-                hintText: 'Enter your message',
-              ),
-              onSubmitted: (_) => _sendMessage(),
+            BlocBuilder<GeminiCubit, GeminiState>(
+              builder: (context, state) {
+                return state.isQuizMode
+                    ? Container() // Hide text input in quiz mode
+                    : TextField(
+                        controller: _textController,
+                        decoration: const InputDecoration(
+                          hintText: 'Enter your message',
+                        ),
+                        onSubmitted: (_) => _sendMessage(),
+                      );
+              },
             ),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: _sendMessage,
-                  child: const Text('Send'),
+            Row(
+              children: [
+                BlocBuilder<GeminiCubit, GeminiState>(
+                  builder: (context, state) {
+                    return state.isQuizMode
+                        ? Container()
+                        : Expanded(
+                            child: ElevatedButton(
+                              onPressed: _sendMessage,
+                              child: const Text('Send'),
+                            ),
+                          );
+                  },
                 ),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: _resetConversation,
-                child: const Text('Reset'),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: _toggleEegState,
-                child: const Text('Toggle State'),
-              ),
-            ],
-          ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: _resetConversation,
+                  child: const Text('Reset'),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: _toggleEegState,
+                  child: const Text('Toggle State'),
+                ),
+                const SizedBox(width: 8),
+                BlocBuilder<GeminiCubit, GeminiState>(
+                  builder: (context, state) {
+                    return state.isQuizMode
+                        ? Container()
+                        : ElevatedButton(
+                            onPressed: _enterQuizMode,
+                            child: const Text('Start Quiz'),
+                          );
+                  },
+                ),
+              ],
+            ),
           ],
         ),
       ),
     );
   }
 
-ListView buildChatList(GeminiState state, {bool loading = false}) {
-  return ListView.builder(
-    itemCount: state.messages.length + (loading ? 1 : 0),
-    itemBuilder: (context, index) {
-      if (index == state.messages.length && loading) {
-        return Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: BouncingDots(),
+  ListView buildChatList(GeminiState state, {bool loading = false}) {
+    return ListView.builder(
+      itemCount: state.messages.length + (loading ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index == state.messages.length && loading) {
+          return const Card(
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: BouncingDots(),
+              ),
             ),
-          ),
-        );
-      }
-
-      final message = state.messages[index];
-
-      String text = "";
-      for (var part in message.parts) {
-        if (part is TextPart) {
-          text += part.text;
+          );
         }
-      }
 
-      return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: message.role != 'user'
-                ? CrossAxisAlignment.start
-                : CrossAxisAlignment.end,
-            children: [
-              MarkdownBody(data: text),
-            ],
-          ),
-        ),
-      );
-    },
-  );
-}
-}
+        if (state.messages[index].type == MessageType.lessonScript) {
+          // skip
+          return Container();
+        }
 
+        final message = state.messages[index];
+        // String text = message.parts.whereType<TextPart>().map((part) => part.text).join();
+        String text = message.text;
+
+        if (message.type == MessageType.quizQuestion) {
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  MarkdownBody(data: text),
+                  ...message.quizOptions!.asMap().entries.map((entry) {
+                    return ElevatedButton(
+                      onPressed: () => {_checkAnswer(entry.key)},
+                      child: Text(entry.value),
+                    );
+                  }),
+                ],
+              ),
+            ),
+          );
+        } else if (message.type == MessageType.quizAnswer) {
+          bool correct = message.text == message.correctAnswer;
+          var text = Text(
+            correct
+                ? "Correct!"
+                : "Incorrect. The correct answer was: ${message.quizOptions![message.correctAnswer!]}",
+            style: TextStyle(
+              color: correct ? Colors.green : Colors.red,
+              fontWeight: FontWeight.bold,
+            ),
+          );
+
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [text],
+              ),
+            ),
+          );
+        } else {
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: message.source == MessageSource.agent
+                    ? CrossAxisAlignment.start
+                    : CrossAxisAlignment.end,
+                children: [MarkdownBody(data: text)],
+              ),
+            ),
+          );
+        }
+      },
+    );
+  }
+}
 
 class BouncingDots extends StatefulWidget {
   const BouncingDots({super.key});
@@ -188,7 +268,8 @@ class BouncingDots extends StatefulWidget {
   BouncingDotsState createState() => BouncingDotsState();
 }
 
-class BouncingDotsState extends State<BouncingDots> with TickerProviderStateMixin {
+class BouncingDotsState extends State<BouncingDots>
+    with TickerProviderStateMixin {
   late List<AnimationController> _controllers;
   late List<Animation<double>> _animations;
 
@@ -197,16 +278,16 @@ class BouncingDotsState extends State<BouncingDots> with TickerProviderStateMixi
     super.initState();
     _controllers = List.generate(
       3,
-          (index) => AnimationController(
+      (index) => AnimationController(
         duration: const Duration(milliseconds: 400),
         vsync: this,
       ),
     );
-    _animations = _controllers.map((controller) =>
-        Tween<double>(begin: 0, end: -10).animate(
-          CurvedAnimation(parent: controller, curve: Curves.easeInOut),
-        )
-    ).toList();
+    _animations = _controllers
+        .map((controller) => Tween<double>(begin: 0, end: -10).animate(
+              CurvedAnimation(parent: controller, curve: Curves.easeInOut),
+            ))
+        .toList();
 
     for (var i = 0; i < 3; i++) {
       Future.delayed(Duration(milliseconds: i * 180), () {
