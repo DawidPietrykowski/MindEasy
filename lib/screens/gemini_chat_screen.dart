@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:gemini_app/bloc/eeg_state.dart';
 import 'package:gemini_app/bloc/gemini_state.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gemini_app/eeg/eeg_service.dart';
+import 'package:get_it/get_it.dart';
 
 class GeminiScreen extends StatelessWidget {
   const GeminiScreen({super.key});
@@ -14,7 +13,6 @@ class GeminiScreen extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => GeminiCubit()),
-        BlocProvider(create: (context) => EegCubit()),
       ],
       child: const GeminiChat(),
     );
@@ -31,6 +29,7 @@ class GeminiChat extends StatefulWidget {
 class GeminiChatState extends State<GeminiChat> {
   final _textController = TextEditingController();
   bool _quizMode = false; // Add this line
+  final EegService _eegService = GetIt.instance<EegService>();
 
   @override
   void initState() {
@@ -50,23 +49,23 @@ class GeminiChatState extends State<GeminiChat> {
 
   @override
   void dispose() {
-    context.read<EegCubit>().stopPolling();
+    _eegService.stopPolling();
     super.dispose();
   }
 
   void _startConversation() async {
-    context.read<GeminiCubit>().startLesson(context.read<EegCubit>().state);
+    context.read<GeminiCubit>().startLesson();
   }
 
   void _sendMessage() async {
     context
         .read<GeminiCubit>()
-        .sendMessage(_textController.text, context.read<EegCubit>().state);
+        .sendMessage(_textController.text);
     _textController.clear();
   }
 
   void _toggleEegState() {
-    context.read<EegCubit>().toggleState();
+    _eegService.toggleState();
   }
 
   void _resetConversation() {
@@ -93,23 +92,19 @@ class GeminiChatState extends State<GeminiChat> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            BlocBuilder<EegCubit, EegState>(
-              builder: (context, eegState) {
-                return Card(
+            Card(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                            'Mind Wandering: ${eegState.mind_wandering.toStringAsFixed(2)}'),
-                        Text('Focus: ${eegState.focus.toStringAsFixed(2)}'),
+                            'Mind Wandering: ${_eegService.state.mind_wandering.toStringAsFixed(2)}'),
+                        Text('Focus: ${_eegService.state.focus.toStringAsFixed(2)}'),
                       ],
                     ),
                   ),
-                );
-              },
-            ),
+                ),
             Expanded(
               child: BlocBuilder<GeminiCubit, GeminiState>(
                 builder: (context, state) {

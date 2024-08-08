@@ -1,0 +1,102 @@
+[
+    {
+        "question": "Which part of the cell is known as the 'powerhouse'?",
+        "options": [
+            "Nucleus",
+            "Ribosome",
+            "Mitochondria",
+            "Golgi Apparatus"
+        ],
+        "correctAnswer": 2
+    },
+    {
+        "question": "What is the main function of ribosomes?",
+        "options": [
+            "DNA replication",
+            "Protein synthesis",
+            "Energy production",
+            "Waste removal"
+        ],
+        "correctAnswer": 1
+    },
+    {
+        "question": "Which organelle is responsible for packaging and transporting proteins?",
+        "options": [
+            "Endoplasmic Reticulum",
+            "Nucleus",
+            "Golgi Apparatus",
+            "Lysosome"
+        ],
+        "correctAnswer": 2
+    },
+    {
+        "question": "Which structure in the cell controls its activities and contains genetic material?",
+        "options": [
+            "Cytoplasm",
+            "Nucleus",
+            "Mitochondria",
+            "Cell Membrane"
+        ],
+        "correctAnswer": 1
+    },
+    {
+        "question": "What is the semi-fluid substance inside the cell that contains the organelles?",
+        "options": [
+            "Cytoplasm",
+            "Nucleoplasm",
+            "Plasma",
+            "Protoplasm"
+        ],
+        "correctAnswer": 0
+    },
+    {
+        "question": "Which organelle is responsible for breaking down waste materials and cellular debris?",
+        "options": [
+            "Ribosome",
+            "Lysosome",
+            "Mitochondria",
+            "Endoplasmic Reticulum"
+        ],
+        "correctAnswer": 1
+    },
+    {
+        "question": "What is the function of the cell membrane?",
+        "options": [
+            "Protects the cell and controls what enters and exits",
+            "Stores genetic information",
+            "Produces energy",
+            "Synthesizes proteins"
+        ],
+        "correctAnswer": 0
+    },
+    {
+        "question": "Which type of cell contains a nucleus?",
+        "options": [
+            "Prokaryotic",
+            "Eukaryotic",
+            "Both",
+            "Neither"
+        ],
+        "correctAnswer": 1
+    },
+    {
+        "question": "Which organelle is involved in the synthesis of lipids and detoxification?",
+        "options": [
+            "Rough Endoplasmic Reticulum",
+            "Smooth Endoplasmic Reticulum",
+            "Golgi Apparatus",
+            "Ribosome"
+        ],
+        "correctAnswer": 1
+    },
+    {
+        "question": "What is transported by vesicles that bud off from the Golgi apparatus?",
+        "options": [
+            "DNA",
+            "Proteins",
+            "RNA",
+            "Lipids"
+        ],
+        "correctAnswer": 1
+    }
+]

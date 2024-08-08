@@ -4,13 +4,14 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/services.dart';
 import 'package:gemini_app/config.dart';
 import 'package:gemini_app/bloc/eeg_state.dart';
+import 'package:gemini_app/eeg/eeg_service.dart';
+import 'package:get_it/get_it.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 const String systemPrmpt =
     """You are an AI tutor helping students understand topics with help of biometric data. You will be supplied with a json containing data extracted from an EEG device, use that data to modify your approach and help the student learn more effectively.
 At the start you will be provided a script with a lesson to cover.
 Keep the analysis and responses short.
-Use language: POLISH
 
 After completing the theoretical part there's a quiz, you can start it yourself at the appropriate time or react to users' request by including <QUIZ_START_TOKEN> at the start of your response
 
@@ -41,18 +42,6 @@ class QuizMessage {
     this.userAnswer,
   });
 }
-
-// class Message {
-//   final String text;
-//   final MessageType type;
-//   final MessageSource source;
-
-//   Message({
-//     required this.text,
-//     required this.type,
-//     required this.source,
-//   });
-// }
 
 enum MessageType { text, lessonScript, quizQuestion, quizAnswer }
 
@@ -148,11 +137,7 @@ class GeminiState {
 
   static GeminiState get initialState => GeminiState(
         status: GeminiStatus.initial,
-        // messages: [Message(text: "Hello, I'm Gemini Pro. How can I help you?", type: MessageType.text, source: MessageSource.agent)],
-        messages: [
-          // Message.fromGeminiContent(Content.model(
-          //     [TextPart("Hello, I'm Gemini Pro. How can I help you?")]))
-        ],
+        messages: [],
         error: '',
       );
 }
@@ -160,11 +145,13 @@ class GeminiState {
 class GeminiCubit extends Cubit<GeminiState> {
   GeminiCubit() : super(GeminiState.initialState);
 
-  void startLesson(EegState eegState) async {
+  void startLesson() async {
     final quizQuestions = await loadQuizQuestions();
-    final String rjp = await rootBundle.loadString('assets/lessons/rjp.md');
-    final String prompt =
-        "Jesteś nauczycielem/chatbotem prowadzącym zajęcia z jednym uczniem. Uczeń ma możliwość zadawania pytań w trakcie, natomiast jesteś odpowiedzialny za prowadzenie lekcji i przedstawienie tematu. Zacznij prowadzić lekcje dla jednego ucznia na podstawie poniszego skryptu:\n$rjp";
+    final String lessonScript = await rootBundle.loadString('assets/lessons/cells.md');
+    // final String prompt =
+        // "Jesteś nauczycielem/chatbotem prowadzącym zajęcia z jednym uczniem. Uczeń ma możliwość zadawania pytań w trakcie, natomiast jesteś odpowiedzialny za prowadzenie lekcji i przedstawienie tematu. Zacznij prowadzić lekcje dla jednego ucznia na podstawie poniszego skryptu:\n$rjp";
+    final String prompt = 
+        "You are a teacher/chatbot conducting a class with one student. The student has the ability to ask questions during the lesson, while you are responsible for leading the class and presenting the topic. Start conducting the lesson for one student based on the script below:\n$lessonScript";
 
     final safetySettings = [
       SafetySetting(HarmCategory.harassment, HarmBlockThreshold.none),
@@ -197,7 +184,7 @@ class GeminiCubit extends Cubit<GeminiState> {
     try {
       final chat = state.model!.startChat(history: [Content.text(prompt)]);
       final stream = chat.sendMessageStream(Content.text(
-          "EEG DATA:\n${eegState.getJsonString()}\nPytanie:\n$prompt"));
+          "EEG DATA:\n${GetIt.instance<EegService>().state.getJsonString()}\nMessage:\n$prompt"));
 
       String responseText = '';
 
@@ -221,13 +208,9 @@ class GeminiCubit extends Cubit<GeminiState> {
         error: e.toString(),
       ));
     }
-
-    // enterQuizMode();
-
-    // sendMessage(prompt, eegState);
   }
 
-  void sendMessage(String prompt, EegState eegState) async {
+  void sendMessage(String prompt) async {
     List<Message> messagesWithoutPrompt = state.messages;
     var messagesWithPrompt = state.messages +
         [
@@ -246,7 +229,7 @@ class GeminiCubit extends Cubit<GeminiState> {
               .map((mess) => mess.toGeminiContent())
               .toList());
       final stream = chat.sendMessageStream(Content.text(
-          "EEG DATA:\n${eegState.getJsonString()}\nWiadomość od ucznia:\n$prompt"));
+          "EEG DATA:\n${GetIt.instance<EegService>().state.getJsonString()}\nUser message:\n$prompt"));
 
       String responseText = '';
 
@@ -298,7 +281,7 @@ class GeminiCubit extends Cubit<GeminiState> {
 
   Future<List<QuizQuestion>> loadQuizQuestions() async {
     final String quizJson =
-        await rootBundle.loadString('assets/lessons/rjp.json');
+        await rootBundle.loadString('assets/lessons/cells.json');
     final List<dynamic> quizData = json.decode(quizJson);
 
     return quizData

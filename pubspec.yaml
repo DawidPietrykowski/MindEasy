@@ -41,6 +41,7 @@ dependencies:
   flutter_lints: ^3.0.0
   flutter_markdown: ^0.7.3
   flutter_bloc: ^8.0.1
+  get_it: ^7.7.0
 
 dev_dependencies:
   flutter_test:
@@ -69,8 +70,7 @@ flutter:
   #   - images/a_dot_ham.jpeg
 
   assets: 
-    - assets/lessons/rjp.md
-    - assets/lessons/rjp.json
+    - assets/lessons/
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

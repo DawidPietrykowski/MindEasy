@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:gemini_app/eeg/eeg_service.dart';
 import 'package:gemini_app/screens/gemini_chat_screen.dart';
+import 'package:get_it/get_it.dart';
 
 void main() {
+  GetIt.I.registerSingleton<EegService>(EegService());
   runApp(const MyApp());
 }
 
