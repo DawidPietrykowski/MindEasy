@@ -226,7 +226,8 @@ class GeminiChatState extends State<GeminiChat> {
           );
         }
 
-        if (state.messages[index].type == MessageType.lessonScript) {
+        if (state.messages[index].type == MessageType.lessonScript || 
+        state.messages[index].source == MessageSource.app) {
           // skip
           return Container();
         }
@@ -254,7 +255,7 @@ class GeminiChatState extends State<GeminiChat> {
             ),
           );
         } else if (message.type == MessageType.quizAnswer) {
-          bool correct = message.text == message.correctAnswer;
+          bool correct = message.text == message.quizOptions![message.correctAnswer!];
           var text = Text(
             correct
                 ? "Correct!"

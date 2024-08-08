@@ -11,11 +11,12 @@ const String systemPrmpt =
     """You are an AI tutor helping students understand topics with help of biometric data. You will be supplied with a json containing data extracted from an EEG device, use that data to modify your approach and help the student learn more effectively.
 At the start you will be provided a script with a lesson to cover.
 Keep the analysis and responses short.
+Student is 15 years old.
 
 After completing the theoretical part there's a quiz, you can start it yourself at the appropriate time or react to users' request by including <QUIZ_START_TOKEN> at the start of your response
 
 Write the response in markdown and split it into two parts (include the tokens):
-optional: <QUIZ_START_TOKEN>
+optional: <QUIZ_START_TOKEN> (makes the app transition to quiz mode, do not write the question yourself, use it ONLY when you want to start the quiz)
 <ANALYSIS_START_TOKEN>
 here describe what is the state of the student and how to best approach them
 <LESSON_START_TOKEN>
@@ -30,7 +31,7 @@ enum GeminiStatus { initial, loading, success, error }
 
 // enum MessageType { text, image, audio, video }
 
-enum MessageSource { user, agent }
+enum MessageSource { user, agent, app}
 
 class QuizMessage {
   final String content;
@@ -80,10 +81,33 @@ class Message {
   }
 
   Content toGeminiContent() {
-    if (source == MessageSource.user || type == MessageType.lessonScript) {
-      return Content.text(text);
-    } else {
-      return Content.model([TextPart(text)]);
+    // if (source == MessageSource.user || type == MessageType.lessonScript) {
+    //   return Content.text(text);
+    // } else {
+    //   return Content.model([TextPart(text)]);
+    // }
+    switch (type) {
+      case MessageType.text:
+        if (source == MessageSource.user) {
+          return Content.text(text);
+        } else {
+          return Content.model([TextPart(text)]);
+        }
+      case MessageType.lessonScript:
+        return Content.text(text);
+      case MessageType.quizQuestion:
+        String question = text;
+        List<String> options = quizOptions!.map((option) => option.trim()).toList();
+        String answer = options[correctAnswer!];
+        String formattedQuestion = "$question\n\nOptions:\n${options.map((option) => "- $option").join('\n')}\n\nCorrect Answer: $answer";
+        return Content.model([TextPart(formattedQuestion)]);
+      case MessageType.quizAnswer:
+        String expectedAnswer = quizOptions![correctAnswer!];
+        bool userCorrect = expectedAnswer == text;
+        String result = userCorrect ? "User answered correctly with: $text" : "User answered incorrectly with: $text instead of $expectedAnswer";
+        return Content.text(result);
+      default:
+        throw UnsupportedError('Unsupported message type');
     }
   }
 }
@@ -237,16 +261,18 @@ class GeminiCubit extends Cubit<GeminiState> {
     ));
 
     try {
-      final chat = state.model!.startChat(
-          history: messagesWithoutPrompt
+      final chatHistory = messagesWithoutPrompt
               .map((mess) => mess.toGeminiContent())
-              .toList());
+              .toList();
+      final chat = state.model!.startChat(
+          history: chatHistory);
       final stream = chat.sendMessageStream(Content.text(
           "EEG DATA:\n${GetIt.instance<EegService>().state.getJsonString()}\nUser message:\n$prompt"));
 
       String responseText = '';
 
       bool isAnalysisDone = false;
+      String analysisData = "";
 
       await for (final chunk in stream) {
         responseText += chunk.text ?? '';
@@ -254,7 +280,7 @@ class GeminiCubit extends Cubit<GeminiState> {
           isAnalysisDone = true;
           var startIndex = responseText.indexOf(LESSON_START_TOKEN) +
               LESSON_START_TOKEN.length;
-          var analysisData = responseText.substring(0, startIndex);
+          analysisData = responseText.substring(0, startIndex);
           print("ANALYSIS DATA: $analysisData");
           responseText =
               responseText.substring(startIndex, responseText.length);
@@ -272,7 +298,10 @@ class GeminiCubit extends Cubit<GeminiState> {
         }
       }
 
-      if (responseText.contains("<QUIZ_START_TOKEN>")) {
+      if (responseText.contains(QUIZ_START_TOKEN) || analysisData.contains(QUIZ_START_TOKEN)) {
+          emit(state.copyWith(
+              status: GeminiStatus.success,
+              messages: messagesWithPrompt));
         enterQuizMode();
       }
     } catch (e) {
@@ -326,6 +355,27 @@ class GeminiCubit extends Cubit<GeminiState> {
 
   void askNextQuizQuestion() {
     var currentQuizIndex = state.currentQuizIndex + 1;
+
+    if (currentQuizIndex >= state.quizQuestions!.length) {
+    // if (currentQuizIndex >= 2) {
+      List<Message> messagesWithPrompt = state.messages +
+            [
+              Message(
+                  text: "Quiz is over. Write a summary of user's performance.",
+                  type: MessageType.text,
+                  source: MessageSource.app)
+            ];
+
+      // Quiz is over
+      emit(state.copyWith(isQuizMode: false, currentQuizIndex: 0, 
+      messages: messagesWithPrompt));
+
+      // Send a message to Gemini to end the quiz
+      sendMessage("");
+
+      return;
+    }
+
     final quizQuestion = state.quizQuestions![currentQuizIndex];
 
     final quizQuestionMessage = Message(
@@ -348,6 +398,7 @@ class GeminiCubit extends Cubit<GeminiState> {
   }
 
   void checkAnswer(int answerIndex) {
+    print("checkAnswer $answerIndex");
     passAnswerToGemini(answerIndex);
   }
 
