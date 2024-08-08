@@ -397,7 +397,7 @@ class BouncingDotsState extends State<BouncingDots>
                   width: 10,
                   height: 10,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor,
+                    color: Colors.white,
                     shape: BoxShape.circle,
                   ),
                 ),

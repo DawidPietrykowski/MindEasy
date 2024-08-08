@@ -19,9 +19,9 @@ class EegState {
 class EegService {
   EegState state;
 
-  EegService() : state = EegState(mindWandering: 0.9, focus: 0.1) {
+  EegService() : state = EegState(mindWandering: 0.1, focus: 0.9) {
     // Start the timer when the cubit is created
-    if (!isDebug) {
+    if (false) {
       startPolling();
     }
   }
@@ -48,7 +48,7 @@ class EegService {
   }
 
   Future<List<double>> fetchEegData() async {
-    if (isDebug) {
+    if (true) {
       return [0.9, 0.1]; // Placeholder ret
     }
 

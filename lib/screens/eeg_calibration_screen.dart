@@ -39,7 +39,6 @@ class MindWanderScreenState extends State<MindWanderScreen>
             _secondsRemaining--;
           });
         } else {
-          _timer!.cancel();
           // Perform any action when the timer reaches zero
           _skipCalibration();
         }
@@ -55,6 +54,7 @@ class MindWanderScreenState extends State<MindWanderScreen>
   }
 
   void _skipCalibration() {
+    _timer?.cancel();
     Navigator.push(context, createSmoothRoute(LessonListScreen()));
   }
 
