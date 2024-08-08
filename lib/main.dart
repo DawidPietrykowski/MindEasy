@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gemini_app/eeg/eeg_service.dart';
 import 'package:gemini_app/screens/eeg_calibration_screen.dart';
 import 'package:get_it/get_it.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   GetIt.I.registerSingleton<EegService>(EegService());
@@ -16,8 +17,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'MindEasy',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        brightness: Brightness.dark,
+        primarySwatch: Colors.teal,
+        textTheme: GoogleFonts.openSansTextTheme(
+          Theme.of(context).textTheme,
+        ),
       ),
       home: const MindWanderScreen(),
     );

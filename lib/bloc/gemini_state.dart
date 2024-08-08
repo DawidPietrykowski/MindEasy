@@ -12,6 +12,7 @@ const String systemPrmpt =
 At the start you will be provided a script with a lesson to cover.
 Keep the analysis short but the lesson can be as long as needed.
 Student is 15 years old. You can only interact using text, no videos, images, or audio.
+Make the lesson more in the style of a lecture, with you explaining the topic and the student asking questions.
 
 After completing the theoretical part there's a quiz, you can start it yourself at the appropriate time or react to users' request by including <QUIZ_START_TOKEN> at the start of your response
 
@@ -81,11 +82,6 @@ class Message {
   }
 
   Content toGeminiContent() {
-    // if (source == MessageSource.user || type == MessageType.lessonScript) {
-    //   return Content.text(text);
-    // } else {
-    //   return Content.model([TextPart(text)]);
-    // }
     switch (type) {
       case MessageType.text:
         if (source == MessageSource.user) {
@@ -187,7 +183,7 @@ class GeminiCubit extends Cubit<GeminiState> {
     // final String prompt =
     // "Jesteś nauczycielem/chatbotem prowadzącym zajęcia z jednym uczniem. Uczeń ma możliwość zadawania pytań w trakcie, natomiast jesteś odpowiedzialny za prowadzenie lekcji i przedstawienie tematu. Zacznij prowadzić lekcje dla jednego ucznia na podstawie poniszego skryptu:\n$rjp";
     final String prompt =
-        "You are a teacher/chatbot conducting a class with one student. The student has the ability to ask questions during the lesson, while you are responsible for leading the class and presenting the topic. Start conducting the lesson for one student based on the script below:\n$lessonScript";
+        "You are a teacher/chatbot conducting a class with one student. The student has the ability to ask questions during the lesson, while you are responsible for leading the class and presenting the topic. Start conducting the lecture for one student based on the script below:\n$lessonScript";
 
     final safetySettings = [
       SafetySetting(HarmCategory.harassment, HarmBlockThreshold.none),

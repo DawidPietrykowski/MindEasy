@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gemini_app/config.dart';
 import 'package:gemini_app/eeg/eeg_service.dart';
 import 'package:get_it/get_it.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class GeminiScreen extends StatelessWidget {
   const GeminiScreen({super.key, required this.lessonId});
@@ -35,8 +36,9 @@ class GeminiChat extends StatefulWidget {
 
 class GeminiChatState extends State<GeminiChat> {
   final _textController = TextEditingController();
-  bool _quizMode = false; // Add this line
+  bool _quizMode = false;
   final EegService _eegService = GetIt.instance<EegService>();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -57,6 +59,7 @@ class GeminiChatState extends State<GeminiChat> {
   @override
   void dispose() {
     _eegService.stopPolling();
+    _scrollController.dispose(); // Add this line
     super.dispose();
   }
 
@@ -67,6 +70,20 @@ class GeminiChatState extends State<GeminiChat> {
   void _sendMessage() async {
     context.read<GeminiCubit>().sendMessage(_textController.text);
     _textController.clear();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom();
+    });
+  }
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   void _toggleEegState() {
@@ -108,9 +125,21 @@ class GeminiChatState extends State<GeminiChat> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                              'Mind Wandering: ${_eegService.state.mindWandering.toStringAsFixed(2)}'),
+                              'Mind Wandering: ${_eegService.state.mindWandering.toStringAsFixed(2)}',
+                              style: GoogleFonts.roboto(
+                                textStyle: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                              )),
                           Text(
-                              'Focus: ${_eegService.state.focus.toStringAsFixed(2)}'),
+                              'Focus: ${_eegService.state.focus.toStringAsFixed(2)}',
+                              style: GoogleFonts.roboto(
+                                textStyle: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                              )),
                         ],
                       ),
                     ),
@@ -120,6 +149,10 @@ class GeminiChatState extends State<GeminiChat> {
             Expanded(
               child: BlocBuilder<GeminiCubit, GeminiState>(
                 builder: (context, state) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    _scrollToBottom();
+                  });
+
                   if (state.status == GeminiStatus.loading) {
                     return buildChatList(state, loading: true);
                   } else if (state.status == GeminiStatus.error) {
@@ -137,15 +170,18 @@ class GeminiChatState extends State<GeminiChat> {
                     ? Container()
                     : TextField(
                         controller: _textController,
+                        style: TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           hintText: 'Enter your message',
+                          hintStyle: TextStyle(color: Colors.grey),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10.0),
+                            borderRadius: BorderRadius.circular(20.0),
+                            borderSide: BorderSide.none,
                           ),
                           filled: true,
-                          fillColor: Colors.grey[200],
+                          // fillColor: Colors.grey[200],
                           contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 12.0),
+                              horizontal: 20.0, vertical: 14.0),
                         ),
                         onSubmitted: (_) => _sendMessage(),
                       );
@@ -153,6 +189,7 @@ class GeminiChatState extends State<GeminiChat> {
             ),
             const SizedBox(height: 16),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
                   onPressed: _resetConversation,
@@ -176,19 +213,18 @@ class GeminiChatState extends State<GeminiChat> {
                     ],
                   ),
                 ),
-                isDebug
-                    ? ElevatedButton(
-                        onPressed: _toggleEegState,
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.toggle_on),
-                            SizedBox(width: 3),
-                            Text('Toggle State'),
-                          ],
-                        ),
-                      )
-                    : Container(),
+                if (isDebug)
+                  ElevatedButton(
+                    onPressed: _toggleEegState,
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.toggle_on),
+                        SizedBox(width: 3),
+                        Text('Toggle State'),
+                      ],
+                    ),
+                  )
               ],
             ),
           ],
@@ -200,6 +236,7 @@ class GeminiChatState extends State<GeminiChat> {
   ListView buildChatList(GeminiState state, {bool loading = false}) {
     return ListView.builder(
       itemCount: state.messages.length + (loading ? 1 : 0),
+      controller: _scrollController,
       itemBuilder: (context, index) {
         if (index == state.messages.length && loading) {
           return const Card(
@@ -230,7 +267,16 @@ class GeminiChatState extends State<GeminiChat> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  MarkdownBody(data: text),
+                  MarkdownBody(
+                      data: text,
+                      styleSheet: MarkdownStyleSheet(
+                        p: GoogleFonts.roboto(
+                            textStyle: const TextStyle(
+                                fontSize: 18,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w300)),
+                      )),
+                  const SizedBox(height: 16),
                   ...message.quizOptions!.asMap().entries.map((entry) {
                     return ElevatedButton(
                       onPressed: () => {_checkAnswer(entry.key)},
@@ -271,7 +317,17 @@ class GeminiChatState extends State<GeminiChat> {
                 crossAxisAlignment: message.source == MessageSource.agent
                     ? CrossAxisAlignment.start
                     : CrossAxisAlignment.end,
-                children: [MarkdownBody(data: text)],
+                children: [
+                  MarkdownBody(
+                      data: text,
+                      styleSheet: MarkdownStyleSheet(
+                        p: GoogleFonts.roboto(
+                            textStyle: const TextStyle(
+                                fontSize: 18,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w300)),
+                      ))
+                ],
               ),
             ),
           );

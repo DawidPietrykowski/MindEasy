@@ -70,19 +70,22 @@ class MindWanderScreenState extends State<MindWanderScreen>
           AnimatedBuilder(
             animation: _animation,
             builder: (context, child) {
-              return Opacity(
-                opacity: _animation.value,
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Colors.blue.withOpacity(0.5),
-                        Colors.green.withOpacity(0.5),
-                      ],
-                      transform:
-                          GradientRotation(_animation.value * 2 * 3.1415926535),
+              return Container(
+                color: Colors.white,
+                child: Opacity(
+                  opacity: _animation.value,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.blue.withOpacity(0.5),
+                          Colors.green.withOpacity(0.5),
+                        ],
+                        transform: GradientRotation(
+                            _animation.value * 2 * 3.1415926535),
+                      ),
                     ),
                   ),
                 ),
