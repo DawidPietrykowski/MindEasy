@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/services.dart';
+import 'package:gemini_app/api_key.dart';
 import 'package:gemini_app/config.dart';
-import 'package:gemini_app/bloc/eeg_state.dart';
 import 'package:gemini_app/eeg/eeg_service.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
@@ -22,6 +22,10 @@ here describe what is the state of the student and how to best approach them
 <LESSON_START_TOKEN>
 here continue with the lesson, respond to answers, etc
 """;
+
+const String LESSON_START_TOKEN = "<LESSON_START_TOKEN>";
+const String ANALYSIS_START_TOKEN = "<ANALYSIS_START_TOKEN>";
+const String QUIZ_START_TOKEN = "<QUIZ_START_TOKEN>";
 
 enum GeminiStatus { initial, loading, success, error }
 
@@ -147,10 +151,11 @@ class GeminiCubit extends Cubit<GeminiState> {
 
   void startLesson() async {
     final quizQuestions = await loadQuizQuestions();
-    final String lessonScript = await rootBundle.loadString('assets/lessons/cells.md');
+    final String lessonScript =
+        await rootBundle.loadString('assets/lessons/cells.md');
     // final String prompt =
-        // "Jesteś nauczycielem/chatbotem prowadzącym zajęcia z jednym uczniem. Uczeń ma możliwość zadawania pytań w trakcie, natomiast jesteś odpowiedzialny za prowadzenie lekcji i przedstawienie tematu. Zacznij prowadzić lekcje dla jednego ucznia na podstawie poniszego skryptu:\n$rjp";
-    final String prompt = 
+    // "Jesteś nauczycielem/chatbotem prowadzącym zajęcia z jednym uczniem. Uczeń ma możliwość zadawania pytań w trakcie, natomiast jesteś odpowiedzialny za prowadzenie lekcji i przedstawienie tematu. Zacznij prowadzić lekcje dla jednego ucznia na podstawie poniszego skryptu:\n$rjp";
+    final String prompt =
         "You are a teacher/chatbot conducting a class with one student. The student has the ability to ask questions during the lesson, while you are responsible for leading the class and presenting the topic. Start conducting the lesson for one student based on the script below:\n$lessonScript";
 
     final safetySettings = [
@@ -181,42 +186,51 @@ class GeminiCubit extends Cubit<GeminiState> {
         model: model);
     emit(initialState);
 
-    try {
-      final chat = state.model!.startChat(history: [Content.text(prompt)]);
-      final stream = chat.sendMessageStream(Content.text(
-          "EEG DATA:\n${GetIt.instance<EegService>().state.getJsonString()}\nMessage:\n$prompt"));
+    sendMessage("");
 
-      String responseText = '';
+    // try {
+    //   final chat = state.model!.startChat(history: [Content.text(prompt)]);
+    //   final stream = chat.sendMessageStream(Content.text(
+    //       "EEG DATA:\n${GetIt.instance<EegService>().state.getJsonString()}\nMessage:\n$prompt"));
 
-      await for (final chunk in stream) {
-        responseText += chunk.text ?? '';
-        emit(initialState.copyWith(
-            status: GeminiStatus.success,
-            messages: [
-              lessonScriptMessage,
-              Message(
-                  source: MessageSource.agent,
-                  text: responseText,
-                  type: MessageType.text)
-            ],
-            model: model));
-      }
-    } catch (e) {
-      emit(GeminiState(
-        status: GeminiStatus.error,
-        messages: state.messages,
-        error: e.toString(),
-      ));
-    }
+    //   String responseText = '';
+
+    //   await for (final chunk in stream) {
+    //     responseText += chunk.text ?? '';
+    //     emit(initialState.copyWith(
+    //         status: GeminiStatus.success,
+    //         messages: [
+    //           lessonScriptMessage,
+    //           Message(
+    //               source: MessageSource.agent,
+    //               text: responseText,
+    //               type: MessageType.text)
+    //         ],
+    //         model: model));
+    //   }
+    // } catch (e) {
+    //   emit(GeminiState(
+    //     status: GeminiStatus.error,
+    //     messages: state.messages,
+    //     error: e.toString(),
+    //   ));
+    // }
   }
 
   void sendMessage(String prompt) async {
     List<Message> messagesWithoutPrompt = state.messages;
-    var messagesWithPrompt = state.messages +
-        [
-          Message(
-              text: prompt, type: MessageType.text, source: MessageSource.user)
-        ];
+    List<Message> messagesWithPrompt;
+    if (prompt == "") {
+      messagesWithPrompt = state.messages;
+    } else {
+      messagesWithPrompt = state.messages +
+          [
+            Message(
+                text: prompt,
+                type: MessageType.text,
+                source: MessageSource.user)
+          ];
+    }
 
     emit(state.copyWith(
       status: GeminiStatus.loading,
@@ -233,17 +247,30 @@ class GeminiCubit extends Cubit<GeminiState> {
 
       String responseText = '';
 
+      bool isAnalysisDone = false;
+
       await for (final chunk in stream) {
         responseText += chunk.text ?? '';
-        emit(state.copyWith(
-            status: GeminiStatus.success,
-            messages: messagesWithPrompt +
-                [
-                  Message(
-                      source: MessageSource.agent,
-                      text: responseText,
-                      type: MessageType.text)
-                ]));
+        if (responseText.contains(LESSON_START_TOKEN)) {
+          isAnalysisDone = true;
+          var startIndex = responseText.indexOf(LESSON_START_TOKEN) +
+              LESSON_START_TOKEN.length;
+          var analysisData = responseText.substring(0, startIndex);
+          print("ANALYSIS DATA: $analysisData");
+          responseText =
+              responseText.substring(startIndex, responseText.length);
+        }
+        if (isAnalysisDone) {
+          emit(state.copyWith(
+              status: GeminiStatus.success,
+              messages: messagesWithPrompt +
+                  [
+                    Message(
+                        source: MessageSource.agent,
+                        text: responseText,
+                        type: MessageType.text)
+                  ]));
+        }
       }
 
       if (responseText.contains("<QUIZ_START_TOKEN>")) {

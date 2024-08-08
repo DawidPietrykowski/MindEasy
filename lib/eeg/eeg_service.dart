@@ -2,26 +2,24 @@ import 'dart:async';
 import 'package:gemini_app/config.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:flutter_bloc/flutter_bloc.dart';
-
 class EegState {
-  final double mind_wandering;
+  final double mindWandering;
   final double focus;
 
   EegState({
-    required this.mind_wandering,
+    required this.mindWandering,
     required this.focus,
   });
 
   String getJsonString() {
-    return '{"mind_wandering": $mind_wandering, "focus": $focus}';
+    return '{"mind_wandering": $mindWandering, "focus": $focus}';
   }
 }
 
 class EegService {
   EegState state;
 
-  EegService() : state = EegState(mind_wandering: 0.9, focus: 0.1) {
+  EegService() : state = EegState(mindWandering: 0.9, focus: 0.1) {
     // Start the timer when the cubit is created
     if (!isDebug) {
       startPolling();
@@ -32,7 +30,7 @@ class EegService {
 
   void startPolling() {
     // Poll every 1 second (adjust the duration as needed)
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       // Simulate getting new EEG data
       // In a real application, you would fetch this data from your EEG device or API
       // double newMindWandering = (DateTime.now().millisecondsSinceEpoch % 100) / 100;
@@ -84,16 +82,16 @@ class EegService {
   }
 
   void updateEegData(double mindWandering, double focus) {
-    state = EegState(mind_wandering: mindWandering, focus: focus);
+    state = EegState(mindWandering: mindWandering, focus: focus);
     print('Mind Wandering: $mindWandering, Focus: $focus');
   }
 
   void toggleState() {
     // Toggle the state between mind_wandering and focus
-    if (state.mind_wandering > state.focus) {
-      updateEegData(state.focus, state.mind_wandering);
+    if (state.mindWandering > state.focus) {
+      updateEegData(state.focus, state.mindWandering);
     } else {
-      updateEegData(state.mind_wandering, state.focus);
+      updateEegData(state.mindWandering, state.focus);
     }
   }
 }

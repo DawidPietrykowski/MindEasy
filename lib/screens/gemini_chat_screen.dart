@@ -58,14 +58,14 @@ class GeminiChatState extends State<GeminiChat> {
   }
 
   void _sendMessage() async {
-    context
-        .read<GeminiCubit>()
-        .sendMessage(_textController.text);
+    context.read<GeminiCubit>().sendMessage(_textController.text);
     _textController.clear();
   }
 
   void _toggleEegState() {
-    _eegService.toggleState();
+    setState(() {
+      _eegService.toggleState();
+    });
   }
 
   void _resetConversation() {
@@ -91,20 +91,23 @@ class GeminiChatState extends State<GeminiChat> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                            'Mind Wandering: ${_eegService.state.mind_wandering.toStringAsFixed(2)}'),
-                        Text('Focus: ${_eegService.state.focus.toStringAsFixed(2)}'),
-                      ],
-                    ),
-                  ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                        'Mind Wandering: ${_eegService.state.mindWandering.toStringAsFixed(2)}'),
+                    Text(
+                        'Focus: ${_eegService.state.focus.toStringAsFixed(2)}'),
+                  ],
                 ),
+              ),
+            ),
+            const SizedBox(height: 16),
             Expanded(
               child: BlocBuilder<GeminiCubit, GeminiState>(
                 builder: (context, state) {
@@ -118,54 +121,87 @@ class GeminiChatState extends State<GeminiChat> {
                 },
               ),
             ),
+            const SizedBox(height: 16),
             BlocBuilder<GeminiCubit, GeminiState>(
               builder: (context, state) {
                 return state.isQuizMode
-                    ? Container() // Hide text input in quiz mode
+                    ? Container()
                     : TextField(
                         controller: _textController,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           hintText: 'Enter your message',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[200],
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 12.0),
                         ),
                         onSubmitted: (_) => _sendMessage(),
                       );
               },
             ),
+            const SizedBox(height: 16),
             Row(
               children: [
-                BlocBuilder<GeminiCubit, GeminiState>(
-                  builder: (context, state) {
-                    return state.isQuizMode
-                        ? Container()
-                        : Expanded(
-                            child: ElevatedButton(
-                              onPressed: _sendMessage,
-                              child: const Text('Send'),
-                            ),
-                          );
-                  },
+                //     BlocBuilder<GeminiCubit, GeminiState>(
+                //       builder: (context, state) {
+                //         return state.isQuizMode
+                //             ? Container()
+                //             : Expanded(
+                //                 child: ElevatedButton(
+                //                   onPressed: _sendMessage,
+                //                   child: const Text('Send'),
+                //                 ),
+                //               );
+                //       },
+                //     ),
+                ElevatedButton(
+                  onPressed: _sendMessage,
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.send),
+                      SizedBox(width: 3),
+                      Text('Send'),
+                    ],
+                  ),
                 ),
-                const SizedBox(width: 8),
+
                 ElevatedButton(
                   onPressed: _resetConversation,
-                  child: const Text('Reset'),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.refresh),
+                      SizedBox(width: 3),
+                      Text('Reset'),
+                    ],
+                  ),
                 ),
-                const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: _toggleEegState,
-                  child: const Text('Toggle State'),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.toggle_on),
+                      SizedBox(width: 3),
+                      Text('Toggle State'),
+                    ],
+                  ),
                 ),
-                const SizedBox(width: 8),
-                BlocBuilder<GeminiCubit, GeminiState>(
-                  builder: (context, state) {
-                    return state.isQuizMode
-                        ? Container()
-                        : ElevatedButton(
-                            onPressed: _enterQuizMode,
-                            child: const Text('Start Quiz'),
-                          );
-                  },
-                ),
+                // ElevatedButton(
+                //   onPressed: _enterQuizMode,
+                //   child: const Row(
+                //     mainAxisAlignment: MainAxisAlignment.center,
+                //     children: [
+                //       Icon(Icons.quiz),
+                //       SizedBox(width: 8),
+                //       Text('Start Quiz'),
+                //     ],
+                //   ),
+                // ),
               ],
             ),
           ],
@@ -302,12 +338,13 @@ class BouncingDotsState extends State<BouncingDots>
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(3, (index) {
         return AnimatedBuilder(
           animation: _controllers[index],
           builder: (context, child) {
             return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4.0),
               padding: const EdgeInsets.all(2.5),
               child: Transform.translate(
                 offset: Offset(0, _animations[index].value),
