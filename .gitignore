@@ -43,3 +43,5 @@ app.*.map.json
 /android/app/release
 
 .vscode
+
+lib/api_key.dart

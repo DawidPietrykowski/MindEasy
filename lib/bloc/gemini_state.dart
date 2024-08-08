@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/services.dart';
 import 'package:gemini_app/api_key.dart';
-import 'package:gemini_app/config.dart';
 import 'package:gemini_app/eeg/eeg_service.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
