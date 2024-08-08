@@ -10,8 +10,8 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 const String systemPrmpt =
     """You are an AI tutor helping students understand topics with help of biometric data. You will be supplied with a json containing data extracted from an EEG device, use that data to modify your approach and help the student learn more effectively.
 At the start you will be provided a script with a lesson to cover.
-Keep the analysis and responses short.
-Student is 15 years old.
+Keep the analysis short but the lesson can be as long as needed.
+Student is 15 years old. You can only interact using text, no videos, images, or audio.
 
 After completing the theoretical part there's a quiz, you can start it yourself at the appropriate time or react to users' request by including <QUIZ_START_TOKEN> at the start of your response
 
@@ -31,7 +31,7 @@ enum GeminiStatus { initial, loading, success, error }
 
 // enum MessageType { text, image, audio, video }
 
-enum MessageSource { user, agent, app}
+enum MessageSource { user, agent, app }
 
 class QuizMessage {
   final String content;
@@ -97,14 +97,18 @@ class Message {
         return Content.text(text);
       case MessageType.quizQuestion:
         String question = text;
-        List<String> options = quizOptions!.map((option) => option.trim()).toList();
+        List<String> options =
+            quizOptions!.map((option) => option.trim()).toList();
         String answer = options[correctAnswer!];
-        String formattedQuestion = "$question\n\nOptions:\n${options.map((option) => "- $option").join('\n')}\n\nCorrect Answer: $answer";
+        String formattedQuestion =
+            "$question\n\nOptions:\n${options.map((option) => "- $option").join('\n')}\n\nCorrect Answer: $answer";
         return Content.model([TextPart(formattedQuestion)]);
       case MessageType.quizAnswer:
         String expectedAnswer = quizOptions![correctAnswer!];
         bool userCorrect = expectedAnswer == text;
-        String result = userCorrect ? "User answered correctly with: $text" : "User answered incorrectly with: $text instead of $expectedAnswer";
+        String result = userCorrect
+            ? "User answered correctly with: $text"
+            : "User answered incorrectly with: $text instead of $expectedAnswer";
         return Content.text(result);
       default:
         throw UnsupportedError('Unsupported message type');
@@ -132,6 +136,7 @@ class GeminiState {
   bool isQuizMode;
   int currentQuizIndex;
   GenerativeModel? model;
+  String? lessonId;
 
   GeminiState(
       {required this.status,
@@ -140,7 +145,8 @@ class GeminiState {
       this.quizQuestions,
       this.isQuizMode = false,
       this.currentQuizIndex = -1,
-      this.model});
+      this.model,
+      this.lessonId});
 
   GeminiState copyWith({
     GeminiStatus? status,
@@ -150,6 +156,7 @@ class GeminiState {
     bool? isQuizMode,
     int? currentQuizIndex,
     GenerativeModel? model,
+    String? lessonId,
   }) {
     return GeminiState(
       status: status ?? this.status,
@@ -159,6 +166,7 @@ class GeminiState {
       isQuizMode: isQuizMode ?? this.isQuizMode,
       currentQuizIndex: currentQuizIndex ?? this.currentQuizIndex,
       model: model ?? this.model,
+      lessonId: lessonId ?? this.lessonId,
     );
   }
 
@@ -172,10 +180,10 @@ class GeminiState {
 class GeminiCubit extends Cubit<GeminiState> {
   GeminiCubit() : super(GeminiState.initialState);
 
-  void startLesson() async {
-    final quizQuestions = await loadQuizQuestions();
+  void startLesson(String lessonId) async {
+    final quizQuestions = await loadQuizQuestions(lessonId);
     final String lessonScript =
-        await rootBundle.loadString('assets/lessons/cells.md');
+        await rootBundle.loadString('assets/lessons/$lessonId.md');
     // final String prompt =
     // "Jesteś nauczycielem/chatbotem prowadzącym zajęcia z jednym uczniem. Uczeń ma możliwość zadawania pytań w trakcie, natomiast jesteś odpowiedzialny za prowadzenie lekcji i przedstawienie tematu. Zacznij prowadzić lekcje dla jednego ucznia na podstawie poniszego skryptu:\n$rjp";
     final String prompt =
@@ -206,38 +214,11 @@ class GeminiCubit extends Cubit<GeminiState> {
         messages: [lessonScriptMessage],
         quizQuestions: quizQuestions,
         isQuizMode: false,
-        model: model);
+        model: model,
+        lessonId: lessonId);
     emit(initialState);
 
     sendMessage("");
-
-    // try {
-    //   final chat = state.model!.startChat(history: [Content.text(prompt)]);
-    //   final stream = chat.sendMessageStream(Content.text(
-    //       "EEG DATA:\n${GetIt.instance<EegService>().state.getJsonString()}\nMessage:\n$prompt"));
-
-    //   String responseText = '';
-
-    //   await for (final chunk in stream) {
-    //     responseText += chunk.text ?? '';
-    //     emit(initialState.copyWith(
-    //         status: GeminiStatus.success,
-    //         messages: [
-    //           lessonScriptMessage,
-    //           Message(
-    //               source: MessageSource.agent,
-    //               text: responseText,
-    //               type: MessageType.text)
-    //         ],
-    //         model: model));
-    //   }
-    // } catch (e) {
-    //   emit(GeminiState(
-    //     status: GeminiStatus.error,
-    //     messages: state.messages,
-    //     error: e.toString(),
-    //   ));
-    // }
   }
 
   void sendMessage(String prompt) async {
@@ -261,11 +242,9 @@ class GeminiCubit extends Cubit<GeminiState> {
     ));
 
     try {
-      final chatHistory = messagesWithoutPrompt
-              .map((mess) => mess.toGeminiContent())
-              .toList();
-      final chat = state.model!.startChat(
-          history: chatHistory);
+      final chatHistory =
+          messagesWithoutPrompt.map((mess) => mess.toGeminiContent()).toList();
+      final chat = state.model!.startChat(history: chatHistory);
       final stream = chat.sendMessageStream(Content.text(
           "EEG DATA:\n${GetIt.instance<EegService>().state.getJsonString()}\nUser message:\n$prompt"));
 
@@ -298,10 +277,10 @@ class GeminiCubit extends Cubit<GeminiState> {
         }
       }
 
-      if (responseText.contains(QUIZ_START_TOKEN) || analysisData.contains(QUIZ_START_TOKEN)) {
-          emit(state.copyWith(
-              status: GeminiStatus.success,
-              messages: messagesWithPrompt));
+      if (responseText.contains(QUIZ_START_TOKEN) ||
+          analysisData.contains(QUIZ_START_TOKEN)) {
+        emit(state.copyWith(
+            status: GeminiStatus.success, messages: messagesWithPrompt));
         enterQuizMode();
       }
     } catch (e) {
@@ -334,9 +313,9 @@ class GeminiCubit extends Cubit<GeminiState> {
     askNextQuizQuestion();
   }
 
-  Future<List<QuizQuestion>> loadQuizQuestions() async {
+  Future<List<QuizQuestion>> loadQuizQuestions(String lessonId) async {
     final String quizJson =
-        await rootBundle.loadString('assets/lessons/cells.json');
+        await rootBundle.loadString('assets/lessons/$lessonId.json');
     final List<dynamic> quizData = json.decode(quizJson);
 
     return quizData
@@ -356,19 +335,22 @@ class GeminiCubit extends Cubit<GeminiState> {
   void askNextQuizQuestion() {
     var currentQuizIndex = state.currentQuizIndex + 1;
 
-    if (currentQuizIndex >= state.quizQuestions!.length) {
-    // if (currentQuizIndex >= 2) {
+    if (currentQuizIndex >= state.quizQuestions!.length ||
+        currentQuizIndex >= 2) {
+      // if (currentQuizIndex >= 2) {
       List<Message> messagesWithPrompt = state.messages +
-            [
-              Message(
-                  text: "Quiz is over. Write a summary of user's performance.",
-                  type: MessageType.text,
-                  source: MessageSource.app)
-            ];
+          [
+            Message(
+                text: "Quiz is over. Write a summary of user's performance.",
+                type: MessageType.text,
+                source: MessageSource.app)
+          ];
 
       // Quiz is over
-      emit(state.copyWith(isQuizMode: false, currentQuizIndex: 0, 
-      messages: messagesWithPrompt));
+      emit(state.copyWith(
+          isQuizMode: false,
+          currentQuizIndex: 0,
+          messages: messagesWithPrompt));
 
       // Send a message to Gemini to end the quiz
       sendMessage("");
@@ -398,7 +380,6 @@ class GeminiCubit extends Cubit<GeminiState> {
   }
 
   void checkAnswer(int answerIndex) {
-    print("checkAnswer $answerIndex");
     passAnswerToGemini(answerIndex);
   }
 

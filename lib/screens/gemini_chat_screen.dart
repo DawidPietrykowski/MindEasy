@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:gemini_app/bloc/gemini_state.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gemini_app/config.dart';
 import 'package:gemini_app/eeg/eeg_service.dart';
 import 'package:get_it/get_it.dart';
 
 class GeminiScreen extends StatelessWidget {
-  const GeminiScreen({super.key});
+  const GeminiScreen({super.key, required this.lessonId});
+
+  final String lessonId;
 
   @override
   Widget build(BuildContext context) {
@@ -14,13 +17,17 @@ class GeminiScreen extends StatelessWidget {
       providers: [
         BlocProvider(create: (context) => GeminiCubit()),
       ],
-      child: const GeminiChat(),
+      child: GeminiChat(
+        lessonId: lessonId,
+      ),
     );
   }
 }
 
 class GeminiChat extends StatefulWidget {
-  const GeminiChat({super.key});
+  const GeminiChat({super.key, required this.lessonId});
+
+  final String lessonId;
 
   @override
   GeminiChatState createState() => GeminiChatState();
@@ -54,7 +61,7 @@ class GeminiChatState extends State<GeminiChat> {
   }
 
   void _startConversation() async {
-    context.read<GeminiCubit>().startLesson();
+    context.read<GeminiCubit>().startLesson(widget.lessonId);
   }
 
   void _sendMessage() async {
@@ -93,20 +100,22 @@ class GeminiChatState extends State<GeminiChat> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                        'Mind Wandering: ${_eegService.state.mindWandering.toStringAsFixed(2)}'),
-                    Text(
-                        'Focus: ${_eegService.state.focus.toStringAsFixed(2)}'),
-                  ],
-                ),
-              ),
-            ),
+            isDebug
+                ? Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                              'Mind Wandering: ${_eegService.state.mindWandering.toStringAsFixed(2)}'),
+                          Text(
+                              'Focus: ${_eegService.state.focus.toStringAsFixed(2)}'),
+                        ],
+                      ),
+                    ),
+                  )
+                : Container(),
             const SizedBox(height: 16),
             Expanded(
               child: BlocBuilder<GeminiCubit, GeminiState>(
@@ -145,30 +154,6 @@ class GeminiChatState extends State<GeminiChat> {
             const SizedBox(height: 16),
             Row(
               children: [
-                //     BlocBuilder<GeminiCubit, GeminiState>(
-                //       builder: (context, state) {
-                //         return state.isQuizMode
-                //             ? Container()
-                //             : Expanded(
-                //                 child: ElevatedButton(
-                //                   onPressed: _sendMessage,
-                //                   child: const Text('Send'),
-                //                 ),
-                //               );
-                //       },
-                //     ),
-                ElevatedButton(
-                  onPressed: _sendMessage,
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.send),
-                      SizedBox(width: 3),
-                      Text('Send'),
-                    ],
-                  ),
-                ),
-
                 ElevatedButton(
                   onPressed: _resetConversation,
                   child: const Row(
@@ -181,27 +166,29 @@ class GeminiChatState extends State<GeminiChat> {
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: _toggleEegState,
+                  onPressed: _sendMessage,
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.toggle_on),
+                      Icon(Icons.send),
                       SizedBox(width: 3),
-                      Text('Toggle State'),
+                      Text('Send'),
                     ],
                   ),
                 ),
-                // ElevatedButton(
-                //   onPressed: _enterQuizMode,
-                //   child: const Row(
-                //     mainAxisAlignment: MainAxisAlignment.center,
-                //     children: [
-                //       Icon(Icons.quiz),
-                //       SizedBox(width: 8),
-                //       Text('Start Quiz'),
-                //     ],
-                //   ),
-                // ),
+                isDebug
+                    ? ElevatedButton(
+                        onPressed: _toggleEegState,
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.toggle_on),
+                            SizedBox(width: 3),
+                            Text('Toggle State'),
+                          ],
+                        ),
+                      )
+                    : Container(),
               ],
             ),
           ],
@@ -226,8 +213,8 @@ class GeminiChatState extends State<GeminiChat> {
           );
         }
 
-        if (state.messages[index].type == MessageType.lessonScript || 
-        state.messages[index].source == MessageSource.app) {
+        if (state.messages[index].type == MessageType.lessonScript ||
+            state.messages[index].source == MessageSource.app) {
           // skip
           return Container();
         }
@@ -255,7 +242,8 @@ class GeminiChatState extends State<GeminiChat> {
             ),
           );
         } else if (message.type == MessageType.quizAnswer) {
-          bool correct = message.text == message.quizOptions![message.correctAnswer!];
+          bool correct =
+              message.text == message.quizOptions![message.correctAnswer!];
           var text = Text(
             correct
                 ? "Correct!"

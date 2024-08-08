@@ -1,0 +1,63 @@
+[
+    {
+      "id": "rjp",
+      "title": "Uniformly accelerated motion",
+      "content": "This lesson covers the basics of uniformly accelerated motion, including the equations for displacement, velocity, and acceleration."
+    },
+    {
+      "id": "cells",
+      "title": "Cells",
+      "content": "This lesson covers the structure and function of cells, including the cell membrane, cytoplasm, and organelles."
+    },
+    {
+    "id": "pw",
+    "title": "Photosynthesis and Respiration",
+    "content": "This lesson explores the processes of photosynthesis and respiration, detailing how plants convert light energy into chemical energy and how both plants and animals use respiration for energy."
+    },
+    {
+    "id": "thermodynamics",
+    "title": "Thermodynamics",
+    "content": "This lesson introduces the laws of thermodynamics and their applications in energy transfer, heat engines, and entropy."
+    },
+    {
+    "id": "newton",
+    "title": "Newton's Laws of Motion",
+    "content": "This lesson discusses Newton's three laws of motion and their significance in understanding the behavior of objects in motion."
+    },
+    {
+    "id": "genetics",
+    "title": "Genetics",
+    "content": "This lesson covers the basics of genetics, including DNA structure, gene expression, and inheritance patterns."
+    },
+    {
+    "id": "waves",
+    "title": "Waves and Sound",
+    "content": "This lesson explores the properties of waves, including frequency, wavelength, and amplitude, as well as the principles of sound and hearing."
+    },
+    {
+    "id": "electricity",
+    "title": "Electricity and Magnetism",
+    "content": "This lesson covers the fundamentals of electricity and magnetism, including electric circuits, Ohm's law, and electromagnetic waves."
+    },
+    {
+    "id": "chemistry",
+    "title": "Introduction to Chemistry",
+    "content": "This lesson provides an overview of basic chemistry concepts, such as atoms, molecules, chemical bonds, and reactions."
+    },
+    {
+    "id": "ecology",
+    "title": "Ecology and Ecosystems",
+    "content": "This lesson discusses the interactions between living organisms and their environments, including food webs, energy flow, and ecosystem dynamics."
+    },
+    {
+    "id": "astronomy",
+    "title": "Introduction to Astronomy",
+    "content": "This lesson introduces the study of astronomy, including the solar system, stars, galaxies, and the universe."
+    },
+    {
+    "id": "geology",
+    "title": "Geology and Earth Science",
+    "content": "This lesson provides an overview of geology, including the structure of the Earth, rock formation, plate tectonics, and natural hazards."
+    }
+]
+  
