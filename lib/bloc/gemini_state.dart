@@ -180,8 +180,6 @@ class GeminiCubit extends Cubit<GeminiState> {
     final quizQuestions = await loadQuizQuestions(lessonId);
     final String lessonScript =
         await rootBundle.loadString('assets/lessons/$lessonId.md');
-    // final String prompt =
-    // "Jesteś nauczycielem/chatbotem prowadzącym zajęcia z jednym uczniem. Uczeń ma możliwość zadawania pytań w trakcie, natomiast jesteś odpowiedzialny za prowadzenie lekcji i przedstawienie tematu. Zacznij prowadzić lekcje dla jednego ucznia na podstawie poniszego skryptu:\n$rjp";
     final String prompt =
         "You are a lecturer teaching a class with one student. The student has the ability to ask questions during the lesson, while you are responsible for lecturing and presenting the topic. Start conducting the lecture for one student based on the script below:\n$lessonScript";
 
