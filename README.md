@@ -1,16 +1,15 @@
-# gemini_app
+# MindEasy
 
 Google Gemini Competition Submission
 
-## Getting Started
+## Descripton
 
-This project is a starting point for a Flutter application.
+MindEasy leverages real-time neural feedback through an EEG headset to customize education content, enhancing focus and engagement. By analyzing brainwave patterns, it adapts learning materials to individual learning styles.
 
-A few resources to get you started if this is your first Flutter project:
+## Architechture
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+The mobile app communicates with a backend service that is responsible for retrieving and analyzing data from the EEG headset.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Backend repository: https://github.com/krzysztoftolpa/MindEasy-EEG
+
+![diagram](./diagram.png)
