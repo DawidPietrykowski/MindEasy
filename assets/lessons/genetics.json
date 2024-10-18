@@ -1,0 +1,102 @@
+[
+  {
+    "question": "What is the basic unit of heredity?",
+    "options": [
+      "Gene",
+      "Chromosome",
+      "Allele",
+      "DNA"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "question": "What is the shape of the DNA molecule?",
+    "options": [
+      "Double helix",
+      "Single helix",
+      "Circular",
+      "Linear"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "question": "Which type of RNA carries genetic information from DNA to the ribosomes?",
+    "options": [
+      "mRNA",
+      "tRNA",
+      "rRNA",
+      "snRNA"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "question": "What is the process by which proteins are synthesized?",
+    "options": [
+      "Transcription",
+      "Translation",
+      "Replication",
+      "Mutation"
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "Which allele masks the expression of another allele in a heterozygous individual?",
+    "options": [
+      "Dominant",
+      "Recessive",
+      "Codominant",
+      "Incomplete dominant"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "question": "What is the probability of inheriting a dominant allele from a heterozygous parent?",
+    "options": [
+      "25%",
+      "50%",
+      "75%",
+      "100%"
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "Which of the following is NOT a Mendelian law?",
+    "options": [
+      "Law of segregation",
+      "Law of independent assortment",
+      "Law of dominance",
+      "Law of heredity"
+    ],
+    "correctAnswer": 3
+  },
+  {
+    "question": "What is the genotype of an individual who shows the dominant phenotype but carries a recessive allele?",
+    "options": [
+      "Homozygous dominant",
+      "Heterozygous",
+      "Homozygous recessive",
+      "Codominant"
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "Which chromosomal abnormality can result in Down syndrome?",
+    "options": [
+      "Trisomy 21",
+      "Monosomy X",
+      "Deletion of 5q",
+      "Duplication of 16p"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "question": "What is the term for the study of genetic inheritance patterns?",
+    "options": [
+      "Cytogenetics",
+      "Genomics",
+      "Proteomics",
+      "Metabolomics"
+    ],
+    "correctAnswer": 0
+  }
+]

@@ -1,0 +1,94 @@
+[  {    "question": "What is the distance between two consecutive crests of a wave called?",    "options": [      "Wavelength",      "Frequency",      "Amplitude",      "Period"    ],
+  "correctAnswer": 0
+},
+  {
+    "question": "Which property of a wave determines how high or low it appears?",
+    "options": [
+      "Wavelength",
+      "Frequency",
+      "Amplitude",
+      "Phase"
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "question": "What unit is used to measure the frequency of a wave?",
+    "options": [
+      "Meters",
+      "Seconds",
+      "Hertz",
+      "Decibels"
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "question": "What is the medium through which sound waves travel?",
+    "options": [
+      "Only solids",
+      "Only liquids",
+      "Only gases",
+      "All of the above"
+    ],
+    "correctAnswer": 3
+  },
+  {
+    "question": "Which part of the ear is responsible for converting sound waves into electrical signals?",
+    "options": [
+      "Eardrum",
+      "Cochlea",
+      "Auditory nerve",
+      "Outer ear"
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "What is the relationship between the wavelength and frequency of a wave?",
+    "options": [
+      "Wavelength is inversely proportional to frequency",
+      "Wavelength is directly proportional to frequency",
+      "Wavelength is equal to frequency",
+      "Wavelength is unrelated to frequency"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "question": "Which type of wave is sound?",
+    "options": [
+      "Transverse wave",
+      "Longitudinal wave",
+      "Surface wave",
+      "Standing wave"
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "What is the unit used to measure the loudness of sound?",
+    "options": [
+      "Hertz",
+      "Meters",
+      "Decibels",
+      "Newtons"
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "question": "Which of the following is an example of a real-world application of wave principles?",
+    "options": [
+      "Radio communication",
+      "Microwaves",
+      "Medical imaging",
+      "All of the above"
+    ],
+    "correctAnswer": 3
+  },
+  {
+    "question": "What is the speed of sound in air at room temperature?",
+    "options": [
+      "174 m/s",
+      "343 m/s",
+      "1087 m/s",
+      "299,792,458 m/s"
+    ],
+    "correctAnswer": 1
+  }
+]

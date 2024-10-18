@@ -1,0 +1,64 @@
+[  {    "question": "What is electricity?",    "options": [      "A type of energy",      "The flow of electric charge",      "A form of magnetism",      "A chemical reaction"    ],
+  "correctAnswer": 1
+},
+  {
+    "question": "What is the basic unit of electric current?",
+    "options": [
+      "Volt",
+      "Ampere",
+      "Ohm",
+      "Watt"
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "What is the relationship between voltage, current, and resistance in an electric circuit?",
+    "options": [
+      "V = IR",
+      "I = VR",
+      "R = VI",
+      "V = I/R"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "question": "What is magnetism?",
+    "options": [
+      "A type of energy",
+      "The force exerted by magnetic fields",
+      "A form of electricity",
+      "A chemical reaction"
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "What are the two poles of a magnet called?",
+    "options": [
+      "Positive and negative",
+      "North and south",
+      "East and west",
+      "Up and down"
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "What is an electromagnetic wave?",
+    "options": [
+      "A type of sound wave",
+      "A type of energy that travels through space",
+      "A type of magnetic field",
+      "A type of electric current"
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "What is the speed of electromagnetic waves in a vacuum?",
+    "options": [
+      "300,000 km/s",
+      "600,000 km/s",
+      "900,000 km/s",
+      "1,200,000 km/s"
+    ],
+    "correctAnswer": 0
+  }
+]

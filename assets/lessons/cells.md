@@ -22,13 +22,7 @@ Topic: Basics of Cell Structure and Function
     Golgi Apparatus: Explain its role in modifying, sorting, and packaging proteins.
     Lysosomes: Describe their function in waste removal and digestion.
 
-4. Interactive Activity (10 Minutes)
-
-    Quiz Questions:
-        "What is the function of the mitochondria?"
-        "Where are proteins synthesized in the cell?"
-        "What is the role of the cell membrane?"
-    Q&A: Allow the student to ask questions and provide explanations.
+4. Interactive Activity (10 Minutes) (trigger the function)
 
 5. Real-World Application (5 Minutes)
 

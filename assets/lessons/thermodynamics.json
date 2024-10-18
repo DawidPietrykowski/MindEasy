@@ -1,0 +1,102 @@
+[
+  {
+    "question": "Which law of thermodynamics states that energy cannot be created or destroyed?",
+    "options": [
+      "First Law",
+      "Second Law",
+      "Third Law",
+      "Zeroth Law"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "question": "What is the unit of entropy?",
+    "options": [
+      "Joule",
+      "Watt",
+      "Kelvin per degree",
+      "Pascal"
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "question": "Which type of process increases the entropy of the universe?",
+    "options": [
+      "Reversible",
+      "Irreversible",
+      "Adiabatic",
+      "Isothermal"
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "What is the efficiency of a Carnot heat engine operating at temperatures T1 and T2?",
+    "options": [
+      "1 - T2/T1",
+      "(T1 - T2)/T1",
+      "T1/(T1 - T2)",
+      "T2/(T2 - T1)"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "question": "Which application of thermodynamics involves converting heat into work?",
+    "options": [
+      "Power plants",
+      "Refrigerators",
+      "Batteries",
+      "Solar panels"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "question": "What is the spontaneity criterion for a chemical reaction?",
+    "options": [
+      "ΔG < 0",
+      "ΔG > 0",
+      "ΔH < 0",
+      "ΔS < 0"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "question": "Which law of thermodynamics is related to the direction of spontaneous processes?",
+    "options": [
+      "First Law",
+      "Second Law",
+      "Third Law",
+      "Zeroth Law"
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "What is the entropy of a perfect crystal at absolute zero?",
+    "options": [
+      "Zero",
+      "Infinity",
+      "Positive but not infinite",
+      "Negative"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "question": "Which type of heat engine converts internal energy directly into work without any heat transfer?",
+    "options": [
+      "External combustion engine",
+      "Internal combustion engine",
+      "Diesel engine",
+      "Stirling engine"
+    ],
+    "correctAnswer": 3
+  },
+  {
+    "question": "What is the efficiency of an ideal heat engine operating between two reservoirs at temperatures T1 and T2?",
+    "options": [
+      "100%",
+      "50%",
+      "25%",
+      "0%"
+    ],
+    "correctAnswer": 0
+  }
+]

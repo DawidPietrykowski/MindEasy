@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:gemini_app/eeg/eeg_service.dart';
 import 'package:gemini_app/main.dart';
 import 'package:gemini_app/screens/lesson_list_screen.dart';
+import 'package:get_it/get_it.dart';
 
 class MindWanderScreen extends StatefulWidget {
   const MindWanderScreen({super.key});
@@ -15,8 +17,10 @@ class MindWanderScreenState extends State<MindWanderScreen>
     with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
+  late TextEditingController _serverUrlController;
   int _secondsRemaining = 60;
   Timer? _timer;
+  bool _isConnected = false;
 
   @override
   void initState() {
@@ -28,6 +32,7 @@ class MindWanderScreenState extends State<MindWanderScreen>
 
     _animation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
 
+    _serverUrlController = TextEditingController();
     // _startTimer();
   }
 
@@ -114,6 +119,66 @@ class MindWanderScreenState extends State<MindWanderScreen>
                           'Time remaining: $_secondsRemaining seconds',
                           style: const TextStyle(fontSize: 18),
                         ),
+                  // Add a text field with a button for connecting to a server in a dev version
+                  _isConnected
+                      ? Container()
+                      : FormField(builder: (FormFieldState state) {
+                          return Column(children: [
+                            TextFormField(
+                              decoration: const InputDecoration(
+                                labelText: 'Server URL',
+                                hintText: 'http://192.168.1.112:1234',
+                              ),
+                              controller: _serverUrlController,
+                            ),
+                            ElevatedButton(
+                              onPressed: () async {
+                                try {
+                                  await EegService.fetchEegData(
+                                      _serverUrlController.text);
+                                  GetIt.I<EegService>().startPolling(_serverUrlController.text);
+                                  setState(() {
+                                    _isConnected = true;
+                                  });
+                                } catch (e) {
+                                  print('Failed to connect to server: $e');
+                                  // Show an error dialog
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        title: const Text('Connection Error',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                            )),
+                                        content: Text(e.toString(),
+                                            style: const TextStyle(
+                                              color: Colors.white54,
+                                            )),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: const Text(
+                                              'OK',
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                }
+                              },
+                              child: const Text('Connect'),
+                            ),
+                          ]);
+                        }),
                 ],
               ),
             ),

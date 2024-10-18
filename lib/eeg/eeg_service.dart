@@ -3,32 +3,41 @@ import 'package:gemini_app/config.dart';
 import 'package:http/http.dart' as http;
 
 class EegState {
-  final double mindWandering;
-  final double focus;
+  final double? mindWandering;
+  final double? focus;
 
   EegState({
     required this.mindWandering,
     required this.focus,
   });
 
+  EegState.initial()
+      : mindWandering = null,
+        focus = null;
+
   String getJsonString() {
+    if (mindWandering == null || focus == null) {
+      return '{unavailable}';
+    }
     return '{"mind_wandering": $mindWandering, "focus": $focus}';
   }
 }
 
 class EegService {
   EegState state;
+  late String serverUrl;
 
-  EegService() : state = EegState(mindWandering: 0.1, focus: 0.9) {
+  EegService() : state = EegState.initial() {
     // Start the timer when the cubit is created
-    if (!isSimulatedEEG) {
-      startPolling();
-    }
+    // if (!isSimulatedEEG) {
+    //   startPolling();
+    // }
   }
 
   Timer? _timer;
 
-  void startPolling() {
+  void startPolling(String url) {
+    serverUrl = url;
     // Poll every 1 second (adjust the duration as needed)
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       // Simulate getting new EEG data
@@ -36,7 +45,7 @@ class EegService {
       // double newMindWandering = (DateTime.now().millisecondsSinceEpoch % 100) / 100;
       // double newFocus = 1 - newMindWandering;
 
-      fetchEegData().then((data) {
+      fetchEegData(serverUrl).then((data) {
         double newMindWandering = data[0];
         double newFocus = data[1];
         // Update the state with the new EEG data
@@ -47,15 +56,13 @@ class EegService {
     });
   }
 
-  Future<List<double>> fetchEegData() async {
+  static Future<List<double>> fetchEegData(String url) async {
     if (isSimulatedEEG) {
       return [0.9, 0.1]; // Placeholder ret
     }
 
-    final url = Uri.parse('http://192.168.83.153:1234');
-
     try {
-      final response = await http.get(url);
+      final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
         // Split the response body by newline and parse as floats
@@ -88,10 +95,10 @@ class EegService {
 
   void toggleState() {
     // Toggle the state between mind_wandering and focus
-    if (state.mindWandering > state.focus) {
-      updateEegData(state.focus, state.mindWandering);
+    if (state.mindWandering! > state.focus!) {
+      updateEegData(state.focus!, state.mindWandering!);
     } else {
-      updateEegData(state.mindWandering, state.focus);
+      updateEegData(state.mindWandering!, state.focus!);
     }
   }
 }

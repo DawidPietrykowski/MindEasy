@@ -305,6 +305,7 @@ class GeminiCubit extends Cubit<GeminiState> {
         generateSummary();
       }
     } catch (e) {
+      print("Error sending message to Gemini: $e");
       emit(GeminiState(
         status: GeminiStatus.error,
         messages: messagesWithPrompt,
@@ -356,9 +357,11 @@ class GeminiCubit extends Cubit<GeminiState> {
   void askNextQuizQuestion() {
     var currentQuizIndex = state.currentQuizIndex + 1;
 
-    if (currentQuizIndex >= state.quizQuestions!.length ||
-        currentQuizIndex >= 2) {
+    if (currentQuizIndex >= state.quizQuestions!.length
+        // ||
+        // currentQuizIndex >= 2) {
       // if (currentQuizIndex >= 2) {
+    ){
       List<Message> messagesWithPrompt = state.messages +
           [
             Message(

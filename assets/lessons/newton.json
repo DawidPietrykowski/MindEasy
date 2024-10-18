@@ -1,0 +1,47 @@
+[
+  {
+    "question": "Which of Newton's laws states that objects resist changes in their motion?",
+    "options": [
+      "First law",
+      "Second law",
+      "Third law"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "question": "According to Newton's second law, force is directly proportional to:",
+    "options": [
+      "Mass",
+      "Acceleration",
+      "Velocity"
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "In Newton's third law, 'action' and 'reaction' forces:",
+    "options": [
+      "Act on the same object",
+      "Act on different objects",
+      "Have the same direction"
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "Which of the following is NOT an example of Newton's first law in action?",
+    "options": [
+      "A car rolling downhill with no friction",
+      "A person standing still on a moving sidewalk",
+      "A ball changing its direction after colliding with a wall"
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "question": "What is the formula for Newton's second law?",
+    "options": [
+      "F = ma",
+      "F = mv^2",
+      "a = F/m"
+    ],
+    "correctAnswer": 0
+  }
+]

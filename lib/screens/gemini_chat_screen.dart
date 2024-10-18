@@ -125,7 +125,7 @@ class GeminiChatState extends State<GeminiChat> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                              'Mind Wandering: ${_eegService.state.mindWandering.toStringAsFixed(2)}',
+                              'Mind Wandering: ${(_eegService.state.mindWandering ?? 0).toStringAsFixed(2)}',
                               style: GoogleFonts.roboto(
                                 textStyle: const TextStyle(
                                     fontSize: 18,
@@ -133,7 +133,7 @@ class GeminiChatState extends State<GeminiChat> {
                                     color: Colors.white),
                               )),
                           Text(
-                              'Focus: ${_eegService.state.focus.toStringAsFixed(2)}',
+                              'Focus: ${(_eegService.state.focus ?? 0).toStringAsFixed(2)}',
                               style: GoogleFonts.roboto(
                                 textStyle: const TextStyle(
                                     fontSize: 18,

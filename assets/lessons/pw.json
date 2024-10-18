@@ -1,0 +1,102 @@
+[
+  {
+    "question": "What is the primary energy source for photosynthesis?",
+    "options": [
+      "Sunlight",
+      "Glucose",
+      "Oxygen",
+      "Carbon dioxide"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "question": "Which part of the plant cell contains chlorophyll?",
+    "options": [
+      "Cytoplasm",
+      "Mitochondria",
+      "Chloroplasts",
+      "Nucleus"
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "question": "What is the main product of photosynthesis?",
+    "options": [
+      "Oxygen",
+      "Glucose",
+      "Carbon dioxide",
+      "Water"
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "Which process breaks down glucose to release energy?",
+    "options": [
+      "Photosynthesis",
+      "Respiration",
+      "Glycolysis",
+      "Krebs cycle"
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "Where does the Krebs cycle take place in a cell?",
+    "options": [
+      "Cytoplasm",
+      "Mitochondria",
+      "Chloroplasts",
+      "Nucleus"
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "What is the final electron acceptor in the electron transport chain?",
+    "options": [
+      "Oxygen",
+      "Carbon dioxide",
+      "ATP",
+      "Glucose"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "question": "Which process releases carbon dioxide as a byproduct?",
+    "options": [
+      "Photosynthesis",
+      "Respiration",
+      "Glycolysis",
+      "Krebs cycle"
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "Which of the following is a reason why photosynthesis is essential for life on Earth?",
+    "options": [
+      "It produces food",
+      "It releases oxygen",
+      "It removes carbon dioxide from the atmosphere",
+      "All of the above"
+    ],
+    "correctAnswer": 3
+  },
+  {
+    "question": "Which of the following is NOT a difference between photosynthesis and respiration?",
+    "options": [
+      "Photosynthesis uses sunlight, while respiration uses glucose",
+      "Photosynthesis produces glucose, while respiration breaks it down",
+      "Both processes release oxygen as a byproduct",
+      "Both processes take place in the mitochondria"
+    ],
+    "correctAnswer": 3
+  },
+  {
+    "question": "What is the name of the organelle where photosynthesis occurs?",
+    "options": [
+      "Mitochondria",
+      "Chloroplasts",
+      "Lysosome",
+      "Endoplasmic Reticulum"
+    ],
+    "correctAnswer": 1
+  }
+]

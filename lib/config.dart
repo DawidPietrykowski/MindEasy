@@ -1,2 +1,2 @@
 const bool isDebug = false;
-const bool isSimulatedEEG = true;
+const bool isSimulatedEEG = false;
