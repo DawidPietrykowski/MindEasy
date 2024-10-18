@@ -251,14 +251,20 @@ class GeminiChatState extends State<GeminiChat> {
         }
 
         if (state.messages[index].type == MessageType.lessonScript ||
-            state.messages[index].source == MessageSource.app) {
+            state.messages[index].source == MessageSource.app || state.messages[index].text == "") {
           // skip
           return Container();
         }
 
         final message = state.messages[index];
-        // String text = message.parts.whereType<TextPart>().map((part) => part.text).join();
         String text = message.text;
+        if (text.contains("User message:\n")){
+          text = text.substring(text.indexOf("User message:\n") + 14);
+        }
+
+        text = text.replaceAll(END_LESSON_TOKEN, "");
+        text = text.replaceAll(ANALYSIS_START_TOKEN, "");
+        text = text.replaceAll(LESSON_START_TOKEN, "");
 
         if (message.type == MessageType.quizQuestion) {
           return Card(

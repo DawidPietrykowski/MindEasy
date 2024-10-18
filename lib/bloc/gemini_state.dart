@@ -18,6 +18,7 @@ After completing the theoretical part there's a quiz, you can start it yourself 
 
 Write the response in markdown and split it into two parts (include the tokens):
 optional: <QUIZ_START_TOKEN> (makes the app transition to quiz mode, do not write the question yourself, use it ONLY when you want to start the quiz)
+optional: <END_LESSON_TOKEN> (ONLY send this when the lesson is over, or when user asks explicitly to end the lesson)
 <ANALYSIS_START_TOKEN>
 here describe what is the state of the student and how to best approach them
 <LESSON_START_TOKEN>
@@ -27,6 +28,10 @@ here continue with the lesson, respond to answers, etc
 const String LESSON_START_TOKEN = "<LESSON_START_TOKEN>";
 const String ANALYSIS_START_TOKEN = "<ANALYSIS_START_TOKEN>";
 const String QUIZ_START_TOKEN = "<QUIZ_START_TOKEN>";
+const String END_LESSON_TOKEN = "<END_LESSON_TOKEN>";
+
+const String lessonOverMessage =
+    "Lesson is over. Write a summary of user's performance. Describe how the EEG state of the user changed during the lesson. This data will be used by researchers to analyze the effectiveness of the lesson.";
 
 enum GeminiStatus { initial, loading, success, error }
 
@@ -130,6 +135,7 @@ class GeminiState {
   List<Message> messages;
   List<QuizQuestion>? quizQuestions;
   bool isQuizMode;
+  bool isLessonEnded;
   int currentQuizIndex;
   GenerativeModel? model;
   String? lessonId;
@@ -142,7 +148,8 @@ class GeminiState {
       this.isQuizMode = false,
       this.currentQuizIndex = -1,
       this.model,
-      this.lessonId});
+      this.lessonId,
+      this.isLessonEnded = false});
 
   GeminiState copyWith({
     GeminiStatus? status,
@@ -150,6 +157,7 @@ class GeminiState {
     List<Message>? messages,
     List<QuizQuestion>? quizQuestions,
     bool? isQuizMode,
+    bool? isLessonEnded,
     int? currentQuizIndex,
     GenerativeModel? model,
     String? lessonId,
@@ -163,6 +171,7 @@ class GeminiState {
       currentQuizIndex: currentQuizIndex ?? this.currentQuizIndex,
       model: model ?? this.model,
       lessonId: lessonId ?? this.lessonId,
+      isLessonEnded: isLessonEnded ?? this.isLessonEnded,
     );
   }
 
@@ -217,30 +226,37 @@ class GeminiCubit extends Cubit<GeminiState> {
 
   void sendMessage(String prompt) async {
     List<Message> messagesWithoutPrompt = state.messages;
-    List<Message> messagesWithPrompt;
-    if (prompt == "") {
-      messagesWithPrompt = state.messages;
-    } else {
-      messagesWithPrompt = state.messages +
-          [
-            Message(
-                text: prompt,
-                type: MessageType.text,
-                source: MessageSource.user)
-          ];
-    }
 
-    emit(state.copyWith(
-      status: GeminiStatus.loading,
-      messages: messagesWithPrompt,
-    ));
+    print("Sending message to Gemini: $prompt");
 
+    List<Message> messagesWithPrompt = messagesWithoutPrompt;
     try {
       final chatHistory =
           messagesWithoutPrompt.map((mess) => mess.toGeminiContent()).toList();
       final chat = state.model!.startChat(history: chatHistory);
-      final stream = chat.sendMessageStream(Content.text(
-          "EEG DATA:\n${GetIt.instance<EegService>().state.getJsonString()}\nUser message:\n$prompt"));
+
+      bool emptyPrompt = prompt == "";
+      if (!state.isLessonEnded) {
+        prompt =
+            "EEG DATA:\n${GetIt.instance<EegService>().state.getJsonString()}\nUser message:\n$prompt";
+      }
+
+      if (!emptyPrompt) {
+        messagesWithPrompt = state.messages +
+            [
+              Message(
+                  text: prompt,
+                  type: MessageType.text,
+                  source: MessageSource.user)
+            ];
+      }
+
+      emit(state.copyWith(
+        status: GeminiStatus.loading,
+        messages: messagesWithPrompt,
+      ));
+
+      final stream = chat.sendMessageStream(Content.text(prompt));
 
       String responseText = '';
 
@@ -249,7 +265,7 @@ class GeminiCubit extends Cubit<GeminiState> {
 
       await for (final chunk in stream) {
         responseText += chunk.text ?? '';
-        if (responseText.contains(LESSON_START_TOKEN)) {
+        if (!state.isLessonEnded && responseText.contains(LESSON_START_TOKEN)) {
           isAnalysisDone = true;
           var startIndex = responseText.indexOf(LESSON_START_TOKEN) +
               LESSON_START_TOKEN.length;
@@ -258,7 +274,8 @@ class GeminiCubit extends Cubit<GeminiState> {
           responseText =
               responseText.substring(startIndex, responseText.length);
         }
-        if (isAnalysisDone) {
+        if (isAnalysisDone || state.isLessonEnded) {
+          print("LESSON DATA: $chunk");
           emit(state.copyWith(
               status: GeminiStatus.success,
               messages: messagesWithPrompt +
@@ -271,11 +288,21 @@ class GeminiCubit extends Cubit<GeminiState> {
         }
       }
 
-      if (responseText.contains(QUIZ_START_TOKEN) ||
-          analysisData.contains(QUIZ_START_TOKEN)) {
+      if (!state.isLessonEnded &&
+          (responseText.contains(QUIZ_START_TOKEN) ||
+              analysisData.contains(QUIZ_START_TOKEN))) {
+        print("QUIZ START TOKEN FOUND");
         emit(state.copyWith(
             status: GeminiStatus.success, messages: messagesWithPrompt));
         enterQuizMode();
+      }
+
+      if (!state.isLessonEnded &&
+          (responseText.contains(END_LESSON_TOKEN) ||
+              analysisData.contains(END_LESSON_TOKEN))) {
+        print("END LESSON TOKEN FOUND");
+        responseText.replaceAll(END_LESSON_TOKEN, "");
+        generateSummary();
       }
     } catch (e) {
       emit(GeminiState(
@@ -371,6 +398,22 @@ class GeminiCubit extends Cubit<GeminiState> {
         messages: updatedMessages,
         isQuizMode: true,
         currentQuizIndex: currentQuizIndex));
+  }
+
+  void generateSummary() {
+    List<Message> messagesWithPrompt = state.messages +
+        [
+          Message(
+              text: lessonOverMessage,
+              type: MessageType.text,
+              source: MessageSource.app)
+        ];
+
+    // Quiz is over
+    emit(state.copyWith(isLessonEnded: true, messages: messagesWithPrompt));
+
+    // Send a message to Gemini to end the quiz
+    sendMessage("");
   }
 
   void checkAnswer(int answerIndex) {
